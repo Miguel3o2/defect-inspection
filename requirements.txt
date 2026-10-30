@@ -10,7 +10,7 @@ joblib
 matplotlib
 mlflow
 pytest
-ruff==0.16.10
+ruff==0.17.3
 torch
 torchvision
 optuna
