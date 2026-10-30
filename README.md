@@ -4,9 +4,8 @@ An end-to-end ML pipeline for steel-surface defects: a classical-ML baseline, a 
 anomaly detection, with failure analysis, ONNX serving, CI and drift monitoring. The point is *choosing the right
 model and proving it*, not defaulting to deep learning.
 
-> **Status:** code complete. Headline, ablation, label-noise, deployment-benchmark and drift results are collected
-> from real runs into `reports/RESULTS.md` (`python scripts/collect_results.py`); the PatchCore and
-> unseen-defect-comparison stages are implemented and CI-tested but await the MVTec AD download.
+> **Status:** complete. All sections below are collected from real runs into `reports/RESULTS.md`
+> (`python scripts/collect_results.py`); nothing is typed by hand.
 
 ## Results
 
@@ -24,6 +23,24 @@ into [`reports/RESULTS.md`](reports/RESULTS.md), which also carries the commit s
 The dataset is easy: every augmentation policy saturates validation (ablation: 1.000 ± 0.000 for all), so the
 honest comparison is the test-split gap (+0.011 for the ResNet over LightGBM) and the error analysis. cleanlab
 flagged 12 candidate label errors (`reports/label_issues.csv`); manual confirmation is pending by design.
+
+**Anomaly detection (PatchCore, MVTec AD — bottle, metal_nut, capsule; trained on defect-free images only):**
+
+| Category | Image AUROC | Pixel AUROC | Precision@thr | Recall@thr |
+|---|---|---|---|---|
+| bottle | 1.000 | 0.983 | 0.97 | 1.00 |
+| metal_nut | 1.000 | 0.986 | 0.97 | 1.00 |
+| capsule | 0.968 | 0.987 | 0.97 | 0.96 |
+| **mean** | **0.989** | **0.986** | | |
+
+**Unseen defect types** (leave-one-defect-type-out; the supervised model trains on good images plus half of every
+*other* defect type, PatchCore never sees any defect):
+
+- vs a supervised ResNet18 (3-seed ensemble): PatchCore **0.987 vs 0.975** mean AUROC on *unseen* types (+0.012,
+  ahead in 6/12 folds, CI excludes 0 in PatchCore's favour in 3, never in the supervised model's favour) and
+  statistically tied on *seen* types (0.986 vs 0.988). TPR at 5% FPR: 0.94 vs 0.89 (unseen).
+- vs LightGBM on handcrafted features: PatchCore wins **12/12 folds on unseen types** (0.987 vs 0.741) and 12/12
+  on seen types (0.986 vs 0.806) — the classical features do not generalise to texture-free colour/shape defects.
 
 **Deployment benchmark** (CPU only, 1 thread — the serving image has no torch/GPU):
 
@@ -90,8 +107,9 @@ pip install torch torchvision --index-url https://download.pytorch.org/whl/cu130
 pip install -r requirements.txt
 python -c "import torch; print(torch.cuda.is_available())"   # must print True on a GPU machine
 make ci && make smoke                 # lint, tests, end-to-end run on synthetic data
-# put NEU-DET under data/raw/NEU-DET, then:
+# put NEU-DET under data/raw/NEU-DET and MVTec AD under data/raw/mvtec_ad/<category>, then:
 make baseline && make deep
+make patchcore && make compare         # MVTec AD categories from configs/patchcore.yaml
 mlflow ui --backend-store-uri sqlite:///mlflow.db
 ```
 `RUNBOOK.md` has the full ordered sequence with gates.
@@ -170,12 +188,12 @@ test and train. The test set is evaluated once per model, at the end.
 
 ## Limitations
 Classification only (no detection or segmentation, so no mAP); no time-series work; no model registry or dataset
-versioning; PatchCore is not served by the API; the unseen-defect comparison has small evaluation sets; drift
-simulations are synthetic stand-ins for real-world drift; benchmark numbers are for one specific CPU (12-core
+versioning; PatchCore is not served by the API; the unseen-defect comparison has small evaluation sets (wide CIs);
+drift simulations are synthetic stand-ins for real-world drift; benchmark numbers are for one specific CPU (12-core
 Intel desktop, single-thread ONNX Runtime). NEU-DET is nearly saturated by all three models (val macro-F1 1.00),
-so model-choice deltas are smaller than one misclassification — MVTec AD (PatchCore, unseen-defect comparison)
-would discriminate better and is the next step. Label-noise candidates are flagged but not yet manually confirmed;
-PatchCore and comparison results are pending the MVTec AD download.
+so model-choice deltas are smaller than one misclassification — MVTec AD discriminates better. PatchCore runs on
+3 of 15 MVTec categories with two documented simplifications (max-patch image score, exact kNN), so its numbers
+sit slightly below the paper's full method. Label-noise candidates are flagged but not yet manually confirmed.
 
 ## Data and licences
 NEU-DET: check the terms of the source you download from. MVTec AD: CC BY-NC-SA 4.0 (non-commercial). No data or
