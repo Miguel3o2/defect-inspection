@@ -1,0 +1,47 @@
+{
+  "env": {
+    "cpu": "Intel64 Family 6 Model 165 Stepping 2, GenuineIntel",
+    "cpu_count": 12,
+    "threads": 1,
+    "ort": "1.30.0",
+    "batch": 32
+  },
+  "rows": [
+    {
+      "backend": "pytorch fp32",
+      "size_mb": 44.794123,
+      "p50_ms": 61.60509999972419,
+      "p95_ms": 152.99308000248857,
+      "p99_ms": 213.83275400025013,
+      "mean_ms": 78.64724790001492,
+      "throughput_img_s": 19.208357902274166,
+      "accuracy": 1.0,
+      "macro_f1": 1.0,
+      "agreement_with_first": 1.0
+    },
+    {
+      "backend": "onnxruntime fp32",
+      "size_mb": 44.708879,
+      "p50_ms": 34.43440000046394,
+      "p95_ms": 36.31195500129252,
+      "p99_ms": 49.98287400201661,
+      "mean_ms": 33.912017800088506,
+      "throughput_img_s": 31.647208314698727,
+      "accuracy": 1.0,
+      "macro_f1": 1.0,
+      "agreement_with_first": 1.0
+    },
+    {
+      "backend": "onnxruntime int8",
+      "size_mb": 11.296859,
+      "p50_ms": 20.43414999934612,
+      "p95_ms": 21.551125002952176,
+      "p99_ms": 26.23372300120536,
+      "mean_ms": 20.03541570008383,
+      "throughput_img_s": 52.5809758118935,
+      "accuracy": 0.9814814814814815,
+      "macro_f1": 0.9814654622835209,
+      "agreement_with_first": 0.9814814814814815
+    }
+  ]
+}

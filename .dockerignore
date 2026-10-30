@@ -1,0 +1,12 @@
+.git
+data
+artifacts
+mlruns
+mlflow.db
+optuna.db
+reports
+tests
+__pycache__
+.venv
+models/*
+!models/current

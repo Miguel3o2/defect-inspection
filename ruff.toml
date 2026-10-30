@@ -1,0 +1,10 @@
+line-length = 130
+target-version = "py311"
+extend-exclude = ["data", "artifacts", "models", "mlruns"]
+
+[lint]
+select = ["E", "F", "W", "I", "B", "C4", "UP", "ISC", "PLW"]
+ignore = ["E501"]   # line length is not enforced; there is no formatter gate
+
+[lint.per-file-ignores]
+"tests/**" = ["E402"]   # importorskip() must run before the imports it guards

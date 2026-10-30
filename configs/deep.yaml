@@ -1,0 +1,30 @@
+data_dir: data/raw/NEU-DET
+image_size: 200
+seed: 42                       # split seed: keep identical to baseline.yaml so models share splits
+split: {val: 0.15, test: 0.15}
+
+model: {arch: resnet18, pretrained: true, dropout: 0.2, freeze_backbone_epochs: 0}
+train:
+  epochs: 25
+  batch_size: 32
+  lr: 3.0e-4
+  weight_decay: 1.0e-4
+  label_smoothing: 0.0
+  class_weights: balanced      # balanced | none
+  patience: 6                  # early stopping on val macro-F1
+  num_workers: 0               # on Windows, spawn+IPC per worker costs more than it saves (images live in RAM)
+  amp: false                   # mixed precision: enable only on tensor-core GPUs (RTX/Ampere+); slower on GTX 16xx
+  aug: geometric               # none | flip | geometric | photometric | full
+
+ablation:
+  policies: [none, flip, geometric, photometric, full]
+  seeds: [0]
+  epochs: 8
+
+optuna:
+  n_trials: 30
+  epochs: 12
+  storage: sqlite:///optuna.db
+  study_name: neu-det-resnet
+
+mlflow: {tracking_uri: "sqlite:///mlflow.db", experiment: "neu-det-deep"}

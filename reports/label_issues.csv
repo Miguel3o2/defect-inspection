@@ -1,0 +1,13 @@
+path,given_label,suggested_label,self_confidence,split
+data\raw\NEU-DET\Pa_94.bmp,patches,crazing,3.0053240167361847e-05,train
+data\raw\NEU-DET\Sc_44.bmp,scratches,inclusion,3.0152575257940982e-05,train
+data\raw\NEU-DET\PS_87.bmp,pitted_surface,inclusion,7.676134952869885e-05,train
+data\raw\NEU-DET\Sc_75.bmp,scratches,inclusion,0.0002112147265170911,train
+data\raw\NEU-DET\Pa_135.bmp,patches,crazing,0.0003057864395390731,train
+data\raw\NEU-DET\Pa_68.bmp,patches,crazing,0.0004273630469020671,train
+data\raw\NEU-DET\Sc_43.bmp,scratches,inclusion,0.0006185649946509088,val
+data\raw\NEU-DET\Pa_63.bmp,patches,crazing,0.0007957287929781245,train
+data\raw\NEU-DET\Pa_240.bmp,patches,crazing,0.001781447647163075,train
+data\raw\NEU-DET\Sc_89.bmp,scratches,inclusion,0.0036077149002142063,train
+data\raw\NEU-DET\Sc_96.bmp,scratches,inclusion,0.004267575511149121,train
+data\raw\NEU-DET\Sc_19.bmp,scratches,inclusion,0.010446955131317149,train

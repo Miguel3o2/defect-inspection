@@ -1,0 +1,4 @@
+path,true,pred,confidence,auto_hint,cause
+data\raw\NEU-DET\Sc_43.bmp,scratches,inclusion,0.993,high_conf_error(label_noise_suspect),
+data\raw\NEU-DET\Sc_1.bmp,scratches,inclusion,0.9992,high_conf_error(label_noise_suspect),
+data\raw\NEU-DET\Sc_73.bmp,scratches,inclusion,0.7786,,

@@ -1,0 +1,97 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  PIP_DISABLE_PIP_VERSION_CHECK: "1"
+
+jobs:
+  lint-test:
+    name: Lint and tests (py${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+          cache-dependency-path: requirements.txt
+      # CPU-only wheels: the default PyPI wheel pulls ~2 GB of CUDA libraries the runner cannot use
+      - name: Install PyTorch (CPU)
+        run: pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Lint
+        run: ruff check src tests scripts
+      - name: Tests
+        run: python -m pytest -q --junitxml=test-results.xml
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-py${{ matrix.python-version }}
+          path: test-results.xml
+
+  smoke:
+    name: End-to-end smoke test and Docker image
+    needs: lint-test
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements.txt
+      - name: Install PyTorch (CPU)
+        run: pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Record resolved dependency versions
+        run: pip freeze > frozen-requirements.txt
+      # synthetic data: baseline, failure analysis, label noise, ResNet training, ONNX export + parity check,
+      # int8 quantisation, API check, benchmark, PatchCore, unseen-defect comparison
+      - name: Pipeline smoke test
+        run: python scripts/smoke_pipeline.py --workdir smoke --models-out models
+      - name: Build Docker image
+        run: docker build -f docker/Dockerfile -t defect-inspection:ci .
+      - name: Run container and probe the API
+        run: |
+          docker run -d --name svc -p 8000:8000 defect-inspection:ci
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:8000/health; then break; fi
+            sleep 2
+          done
+          curl -sf http://localhost:8000/health
+          curl -sf -F file=@smoke/sample.png http://localhost:8000/predict
+      - name: Container logs
+        if: failure()
+        run: docker logs svc || true
+      - name: Upload smoke outputs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-outputs
+          if-no-files-found: ignore
+          path: |
+            smoke/reports
+            smoke/artifacts/patchcore/results.md
+            smoke/artifacts/comparison/results.md
+            frozen-requirements.txt

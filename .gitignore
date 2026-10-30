@@ -1,0 +1,25 @@
+__pycache__/
+*.pyc
+.venv/
+data/raw/*
+!data/raw/.gitkeep
+data/cache/
+mlruns/
+artifacts/
+.pytest_cache/
+.ruff_cache/
+mlflow.db
+optuna.db
+models/*
+!models/.gitkeep
+smoke/
+# Windows: second/leftover virtualenv copy
+.venv-1/
+# dataset images accidentally placed inside the source tree (never commit data)
+src/data/raw/
+# generated outputs that leaked to the repo root (canonical copies live in reports/)
+/error_review.csv
+/predictions.jsonl
+
+# local backup of pre-GPU artifacts (never commit: includes trained weights)
+/artifacts_backup_pre_gpu/
