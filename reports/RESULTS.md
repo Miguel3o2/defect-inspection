@@ -1,6 +1,6 @@
 # Results
 
-_Generated 2026-10-30 11:49 UTC from artifacts/ and reports/ at commit unknown (not a git checkout)._
+_Generated 2026-10-30 15:30 UTC from artifacts/ and reports/ at commit 324ad1a._
 
 ## Headline results (NEU-DET classification)
 
