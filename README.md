@@ -75,6 +75,7 @@ flowchart LR
     R --> A
     R --> X[ONNX export + int8]
     X --> API[FastAPI service in Docker]
+    API --> U[Browser UI]
     API --> L[prediction log]
     L --> M[Evidently drift check]
     P -.-> C[unseen-defect comparison]
@@ -91,7 +92,7 @@ flowchart LR
 | Failure analysis, iterate on data | `reports/failure_analysis.md`, `src/evaluate/` | done |
 | Hyperparameter tuning | Optuna with pruning (built, `make tune`); augmentation ablation run | ablation done |
 | Anomaly detection | PatchCore on MVTec AD, unseen-defect comparison | done |
-| Production inference service | ONNX, int8, FastAPI, Docker, latency benchmark | done |
+| Production inference service | ONNX, int8, FastAPI, browser UI, Docker, latency benchmark | done |
 | Experiment tracking | MLflow | done |
 | CI/CD | GitHub Actions: lint, tests, end-to-end smoke, Docker | done |
 | Drift monitoring | Evidently, simulated corruptions, drift-vs-harm table | done |
@@ -112,6 +113,8 @@ make ci && make smoke                 # lint, tests, end-to-end run on synthetic
 # put NEU-DET under data/raw/NEU-DET and MVTec AD under data/raw/mvtec_ad/<category>, then:
 make baseline && make deep
 make patchcore && make compare         # MVTec AD categories from configs/patchcore.yaml
+make export
+uvicorn src.serve.app:app --port 8000  # browser UI for inference: http://localhost:8000
 mlflow ui --backend-store-uri sqlite:///mlflow.db
 ```
 `RUNBOOK.md` has the full ordered sequence with gates.
