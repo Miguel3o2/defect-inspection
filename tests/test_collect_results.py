@@ -53,21 +53,6 @@ def test_numbers_and_derived_values_are_correct(full):
     assert "12.0 ms vs 20.0 ms in PyTorch" in md                            # ONNX Runtime first, then PyTorch
 
 
-def test_email_uses_only_real_numbers(full, tmp_path):
-    _, facts = cr.collect(full)
-    out = cr.render_email((cr.Path(cr.__file__).resolve().parents[1] / "docs" / "cold_email_template.md").read_text(), facts)
-    assert "{{" not in out
-    assert "0.880 test macro-F1" in out and "0.950 for a fine-tuned ResNet" in out and "(40% lower)" in out
-    assert "[Name]" in out                                                  # personal fields stay manual
-
-
-def test_email_refuses_when_numbers_missing(tmp_path):
-    _, facts = cr.collect(tmp_path)
-    with pytest.raises(SystemExit) as e:
-        cr.render_email("Score {{deep_test_f1}} and {{ort_p50_ms}}", facts)
-    assert "deep_test_f1" in str(e.value) and "ort_p50_ms" in str(e.value)
-
-
 def test_cli_writes_files(full):
-    assert cr.main(["--root", str(full), "--email"]) == 0
-    assert (full / "reports" / "RESULTS.md").exists() and (full / "reports" / "email_draft.md").exists()
+    assert cr.main(["--root", str(full)]) == 0
+    assert (full / "reports" / "RESULTS.md").exists()

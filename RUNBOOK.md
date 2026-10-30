@@ -7,7 +7,7 @@ failed gate and fix it before continuing. If something fails, send me the full l
 
 Rules that protect the credibility of the results:
 1. The **test split is evaluated once**, at the very end (Stage 6), for each model. Everything before uses val.
-2. Never type a number into the README or email by hand. `python scripts/collect_results.py` produces them.
+2. Never type a number into the README by hand. `python scripts/collect_results.py` produces them.
 3. Change one thing at a time; keep MLflow runs (`mlflow ui --backend-store-uri sqlite:///mlflow.db`).
 4. A result that looks too good is a bug until proven otherwise (see "Sanity checks").
 
@@ -94,7 +94,7 @@ Take a screenshot of the Evidently report and of `drift_simulation.md`.
 
 ## Stage 9: results into the README
 ```bash
-python scripts/collect_results.py --email
+python scripts/collect_results.py
 ```
 Paste `reports/RESULTS.md` content into the README results section (keep the generated tables as-is), fill the
 remaining hand-written parts (limitations, what you learned), add 2-3 images (confusion matrix, error montage,
@@ -105,7 +105,6 @@ PatchCore overlays, drift report), record a short demo GIF of `curl` against the
 - [ ] No data, `artifacts/`, `mlruns/`, or `models/*` committed (see `.gitignore`).
 - [ ] README renders on GitHub; all links and the badge work.
 - [ ] Limitations section is honest (see "Known gaps" below).
-- [ ] `reports/email_draft.md` rendered from real numbers; the bracketed personal fields filled by you.
 - [ ] You can explain every number and every design choice out loud; expect to be asked why not X.
 - [ ] Send to a named person (engineer or hiring manager), not a generic inbox.
 

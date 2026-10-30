@@ -44,4 +44,4 @@ drift-simulate:
 drift-check:
 	python -m src.monitoring.drift check --model-dir models/current --log $(LOG)
 results:
-	python scripts/collect_results.py --email
+	python scripts/collect_results.py

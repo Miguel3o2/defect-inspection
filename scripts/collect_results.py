@@ -1,17 +1,14 @@
-"""Collect REAL results from artifacts/ and reports/ into reports/RESULTS.md, and render the cold email from them.
+"""Collect REAL results from artifacts/ and reports/ into reports/RESULTS.md.
 
-  python scripts/collect_results.py                 # writes reports/RESULTS.md
-  python scripts/collect_results.py --email         # also renders reports/email_draft.md
+  python scripts/collect_results.py
 
-Nothing is invented: a missing artifact shows as "not run", and the email refuses to render while any numeric
-placeholder cannot be filled from real results. Run it in the directory where you ran the pipeline.
+Nothing is invented: a missing artifact shows as "not run". Run it in the directory where you ran the pipeline.
 """
 from __future__ import annotations
 
 import argparse
 import csv
 import json
-import re
 import subprocess
 import sys
 from datetime import UTC, datetime
@@ -157,39 +154,16 @@ def collect(root: Path) -> tuple[str, dict]:
     return "\n".join(md), facts
 
 
-_FMT = {"latency_reduction_pct": ".0f", "ort_p50_ms": ".1f", "torch_p50_ms": ".1f"}
-
-
-def render_email(template: str, facts: dict) -> str:
-    keys = sorted(set(re.findall(r"\{\{(\w+)\}\}", template)))
-    missing = [k for k in keys if facts.get(k) is None]
-    if missing:
-        raise SystemExit("Cannot render the email: no real value yet for " + ", ".join(missing) +
-                         ". Run the missing stages (see RUNBOOK.md); do not type numbers in by hand.")
-    out = template
-    for k in keys:
-        out = out.replace("{{" + k + "}}", format(facts[k], _FMT.get(k, ".3f")))
-    left = sorted(set(re.findall(r"\[[^\]]+\]", out)))
-    print("Fill in by hand before sending: " + (", ".join(left) or "nothing"), file=sys.stderr)
-    return out
-
-
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--root", default=".")
     ap.add_argument("--out", default="reports/RESULTS.md")
-    ap.add_argument("--email", action="store_true")
-    ap.add_argument("--template", default=str(Path(__file__).resolve().parents[1] / "docs" / "cold_email_template.md"))
     a = ap.parse_args(argv)
     md, facts = collect(Path(a.root))
     out = Path(a.root) / a.out
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(md, encoding="utf-8")
     print(f"wrote {out}")
-    if a.email:
-        draft = Path(a.root) / "reports" / "email_draft.md"
-        draft.write_text(render_email(Path(a.template).read_text(encoding="utf-8"), facts), encoding="utf-8")
-        print(f"wrote {draft}")
     return 0
 
 
