@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Surface Defect Inspection</title>
+<style>
+  :root {
+    --bg: #0b1220; --card: #111a2e; --line: #22304d; --text: #e6edf7; --muted: #8ea0bf;
+    --accent: #4f9cf9; --ok: #34d399; --bad: #f87171;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; background: var(--bg); color: var(--text);
+    font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    display: flex; justify-content: center; padding: 32px 16px;
+  }
+  main { width: 100%; max-width: 760px; }
+  header { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+  h1 { font-size: 22px; margin: 0; letter-spacing: .2px; }
+  .chips { display: flex; gap: 8px; flex-wrap: wrap; }
+  .chip {
+    font-size: 12px; color: var(--muted); border: 1px solid var(--line);
+    border-radius: 999px; padding: 3px 10px; background: var(--card);
+  }
+  .chip .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--bad); margin-right: 6px; vertical-align: 1px; }
+  .chip.ok .dot { background: var(--ok); }
+  .card {
+    background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+    padding: 20px; margin-bottom: 16px;
+  }
+  #drop {
+    border: 2px dashed var(--line); border-radius: 10px; padding: 34px 16px; text-align: center;
+    cursor: pointer; transition: border-color .15s, background .15s; color: var(--muted);
+  }
+  #drop.hover { border-color: var(--accent); background: rgba(79, 156, 249, .07); color: var(--text); }
+  #drop strong { color: var(--text); }
+  #file { display: none; }
+  #preview {
+    display: none; max-width: 220px; max-height: 220px; margin: 14px auto 0;
+    border: 1px solid var(--line); border-radius: 8px; image-rendering: pixelated;
+  }
+  .row { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+  .muted { color: var(--muted); font-size: 13px; }
+  #verdict { display: none; }
+  #label { font-size: 30px; font-weight: 700; color: var(--accent); margin: 4px 0 2px; }
+  #conf { font-size: 15px; color: var(--muted); }
+  .bars { margin-top: 16px; display: flex; flex-direction: column; gap: 8px; }
+  .bar-row { display: grid; grid-template-columns: 130px 1fr 52px; gap: 10px; align-items: center; font-size: 13px; }
+  .bar-track { background: #0d1526; border: 1px solid var(--line); border-radius: 5px; height: 12px; overflow: hidden; }
+  .bar-fill { height: 100%; background: var(--accent); width: 0; transition: width .35s ease; }
+  .bar-row.top .bar-fill { background: var(--ok); }
+  .bar-row.top .bar-name { color: var(--text); font-weight: 600; }
+  #error {
+    display: none; border: 1px solid var(--bad); color: var(--bad); border-radius: 10px;
+    padding: 12px 14px; margin-top: 14px; font-size: 14px;
+  }
+  footer { color: var(--muted); font-size: 12px; text-align: center; margin-top: 6px; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Surface Defect Inspection</h1>
+    <div class="chips">
+      <span class="chip" id="health"><span class="dot"></span>checking</span>
+      <span class="chip" id="model">model: -</span>
+    </div>
+  </header>
+
+  <section class="card">
+    <div id="drop">
+      <strong>Drop an image here</strong> or click to choose a file
+      <div class="muted">steel-surface image (grayscale 200x200, NEU-DET classes) · max 5 MB</div>
+    </div>
+    <input type="file" id="file" accept="image/png,image/jpeg,image/bmp">
+    <img id="preview" alt="selected image preview">
+    <div id="error"></div>
+  </section>
+
+  <section class="card" id="verdict">
+    <div class="row">
+      <div>
+        <div class="muted">predicted defect class</div>
+        <div id="label">-</div>
+      </div>
+      <div style="text-align:right">
+        <div id="conf">-</div>
+        <div class="muted" id="meta">-</div>
+      </div>
+    </div>
+    <div class="bars" id="bars"></div>
+  </section>
+
+  <footer>probabilities come straight from the served ONNX model · POST /predict does the same thing this page does</footer>
+</main>
+
+<script>
+const drop = document.getElementById("drop");
+const fileInput = document.getElementById("file");
+const preview = document.getElementById("preview");
+const errorBox = document.getElementById("error");
+const verdict = document.getElementById("verdict");
+
+function showError(msg) {
+  errorBox.textContent = msg;
+  errorBox.style.display = "block";
+}
+function clearError() {
+  errorBox.style.display = "none";
+}
+
+async function refreshStatus() {
+  try {
+    const health = await (await fetch("/health")).json();
+    const chip = document.getElementById("health");
+    chip.classList.add("ok");
+    chip.innerHTML = '<span class="dot"></span>' + health.status + " · " + health.model_version;
+    const info = await (await fetch("/model")).json();
+    document.getElementById("model").textContent =
+      "model: " + info.arch + " · " + info.onnx_file + " · " + info.image_size + "px input";
+    return info.classes;
+  } catch {
+    document.getElementById("model").textContent = "model: unreachable";
+    return null;
+  }
+}
+
+function render(probs, top) {
+  verdict.style.display = "block";
+  document.getElementById("label").textContent = top[0][0];
+  document.getElementById("conf").textContent = "confidence " + (top[0][1] * 100).toFixed(1) + "%";
+  document.getElementById("meta").textContent =
+    "v" + probs.model_version + " · " + probs.latency_ms.toFixed(1) + " ms";
+  const bars = document.getElementById("bars");
+  bars.innerHTML = "";
+  for (const [name, value] of top) {
+    const row = document.createElement("div");
+    row.className = "bar-row" + (name === top[0][0] ? " top" : "");
+    row.innerHTML =
+      '<span class="bar-name">' + name + "</span>" +
+      '<span class="bar-track"><span class="bar-fill"></span></span>' +
+      '<span>' + (value * 100).toFixed(1) + "%</span>";
+    bars.appendChild(row);
+    requestAnimationFrame(() => {
+      row.querySelector(".bar-fill").style.width = Math.max(value * 100, 1.5) + "%";
+    });
+  }
+}
+
+async function predict(file) {
+  clearError();
+  if (!file.type.startsWith("image/")) {
+    showError("that file is not an image");
+    return;
+  }
+  preview.src = URL.createObjectURL(file);
+  preview.style.display = "block";
+  const body = new FormData();
+  body.append("file", file, file.name);
+  let res;
+  try {
+    res = await fetch("/predict", { method: "POST", body });
+  } catch {
+    showError("request failed: is the service running?");
+    return;
+  }
+  if (!res.ok) {
+    let detail = res.statusText;
+    try { detail = (await res.json()).detail || detail; } catch {}
+    showError("prediction rejected (" + res.status + "): " + detail);
+    return;
+  }
+  const probs = await res.json();
+  const top = Object.entries(probs.probabilities).sort((a, b) => b[1] - a[1]);
+  render(probs, top);
+}
+
+drop.addEventListener("click", () => fileInput.click());
+fileInput.addEventListener("change", () => fileInput.files[0] && predict(fileInput.files[0]));
+["dragenter", "dragover"].forEach(ev =>
+  drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add("hover"); }));
+["dragleave", "drop"].forEach(ev =>
+  drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove("hover"); }));
+drop.addEventListener("drop", e => e.dataTransfer.files[0] && predict(e.dataTransfer.files[0]));
+
+refreshStatus();
+</script>
+</body>
+</html>

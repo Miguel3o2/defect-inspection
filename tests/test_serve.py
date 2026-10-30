@@ -41,6 +41,12 @@ def test_preprocess_shape_dtype_and_formula():
     assert set(image_stats(gray)) == {"brightness", "contrast", "sharpness"}
 
 
+def test_index_page_served(model_dir):
+    with TestClient(create_app(str(model_dir))) as c:
+        r = c.get("/")
+        assert r.status_code == 200 and "Surface Defect Inspection" in r.text
+
+
 def test_health_model_and_predict(model_dir, tmp_path):
     log = tmp_path / "pred.jsonl"
     with TestClient(create_app(str(model_dir), prediction_log=str(log))) as c:

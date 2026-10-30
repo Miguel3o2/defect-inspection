@@ -20,3 +20,6 @@ src/data/raw/
 /artifacts_backup_pre_gpu/
 
 reports/drift/*.html
+
+# private local project summary, never push this
+/PROJECT_SUMMARY.md

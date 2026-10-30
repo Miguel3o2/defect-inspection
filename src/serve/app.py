@@ -19,6 +19,7 @@ import numpy as np
 import onnxruntime as ort
 from fastapi import FastAPI, File, HTTPException, Request, UploadFile
 from fastapi.concurrency import run_in_threadpool
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
 from src.serve.preprocess import decode_gray, image_stats, to_tensor
@@ -105,6 +106,10 @@ def create_app(model_dir: str | None = None, model_file: str | None = None, pred
             return await run_in_threadpool(decode_gray, data, size)
         except ValueError as e:
             raise HTTPException(400, f"{file.filename}: {e}") from e
+
+    @app.get("/", include_in_schema=False)
+    def index():
+        return FileResponse(Path(__file__).parent / "static" / "index.html")
 
     @app.get("/health")
     def health(request: Request):

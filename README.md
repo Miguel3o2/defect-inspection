@@ -161,12 +161,15 @@ split); eval sets are small so CIs are wide; PatchCore holds out 10% of good tra
 ```bash
 python -m src.deploy.export_onnx --ckpt artifacts/resnet_best.pt --set-current   # models/<version>/ and models/current/
 make benchmark                         # PyTorch vs ONNX Runtime fp32 vs int8: latency, throughput, size, val accuracy
-uvicorn src.serve.app:app --port 8000 && curl -F file=@image.jpg localhost:8000/predict
+uvicorn src.serve.app:app --port 8000  # then open http://localhost:8000 — browser UI for drag-and-drop inference
+curl -F file=@image.jpg localhost:8000/predict
 docker build -f docker/Dockerfile -t defect-inspection . && docker run -p 8000:8000 defect-inspection
 ```
-Export verifies ONNX-vs-PyTorch parity (< 1e-3). int8 is static QDQ quantisation calibrated on train images; read
-its accuracy column next to the speed-up. Endpoints: `/health`, `/model`, `/predict`, `/predict/batch`.
-Rollback = point `MODEL_DIR` at an older `models/<version>/`. The image contains only the runtime (no torch).
+The UI is a single static page served by the same FastAPI app (no Node, no build step), so the Docker image
+serves it unchanged. Export verifies ONNX-vs-PyTorch parity (< 1e-3). int8 is static QDQ quantisation calibrated
+on train images; read its accuracy column next to the speed-up. Endpoints: `/`, `/health`, `/model`, `/predict`,
+`/predict/batch`. Rollback = point `MODEL_DIR` at an older `models/<version>/`. The image contains only the
+runtime (no torch).
 
 ### Drift monitoring (Evidently)
 ```bash
