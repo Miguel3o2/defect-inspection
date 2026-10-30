@@ -1,6 +1,5 @@
 __pycache__/
 *.pyc
-.venv/
 data/raw/*
 !data/raw/.gitkeep
 data/cache/
@@ -13,7 +12,7 @@ optuna.db
 models/*
 !models/.gitkeep
 smoke/
-.venv-1/
+.venv*/
 src/data/raw/
 /error_review.csv
 /predictions.jsonl

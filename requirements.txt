@@ -14,7 +14,7 @@ ruff==0.16.10
 torch
 torchvision
 optuna
-pandas
+pandas<3.1
 cleanlab>=2.6,<3
 fastapi
 uvicorn
