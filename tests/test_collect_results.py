@@ -44,13 +44,13 @@ def test_empty_project_reports_not_run_and_no_claims(tmp_path):
 
 def test_numbers_and_derived_values_are_correct(full):
     md, facts = cr.collect(full)
-    assert facts["latency_reduction_pct"] == pytest.approx(40.0)          # (20 - 12) / 20
+    assert facts["latency_reduction_pct"] == pytest.approx(40.0)
     assert facts["patchcore_image_auroc"] == pytest.approx(0.96) and facts["patchcore_n_categories"] == 2
     assert facts["noise_delta"] == pytest.approx(0.02) and facts["int8_f1_delta"] == pytest.approx(-0.01)
     assert "| ResNet fine-tuned | 0.970 | 0.950 |" in md
     assert "flagged **3** candidate samples" in md and "**1** kept after manual review" in md
     assert "difference +0.070" in md
-    assert "12.0 ms vs 20.0 ms in PyTorch" in md                            # ONNX Runtime first, then PyTorch
+    assert "12.0 ms vs 20.0 ms in PyTorch" in md
 
 
 def test_cli_writes_files(full):

@@ -30,7 +30,6 @@ def _png(value, size=64, noise=0.0, seed=0):
     return buf.tobytes()
 
 
-# ---------------- preprocessing ----------------
 def test_preprocess_shape_dtype_and_formula():
     gray = np.full((SIZE, SIZE), 128, np.uint8)
     t = to_tensor(gray)
@@ -42,7 +41,6 @@ def test_preprocess_shape_dtype_and_formula():
     assert set(image_stats(gray)) == {"brightness", "contrast", "sharpness"}
 
 
-# ---------------- API ----------------
 def test_health_model_and_predict(model_dir, tmp_path):
     log = tmp_path / "pred.jsonl"
     with TestClient(create_app(str(model_dir), prediction_log=str(log))) as c:
@@ -86,7 +84,6 @@ def test_service_matches_direct_onnx_inference(model_dir):
     assert np.allclose([got[k] for k in CLASSES], expected, atol=1e-5)
 
 
-# ---------------- quantisation + benchmark ----------------
 def test_quantize_and_benchmark(model_dir, tmp_path):
     rng = np.random.default_rng(0)
     calib = rng.normal(size=(32, 3, SIZE, SIZE)).astype(np.float32)
@@ -94,7 +91,7 @@ def test_quantize_and_benchmark(model_dir, tmp_path):
     quantize_onnx(str(model_dir / "model.onnx"), str(int8), calib)
     assert int8.exists()
     X = rng.normal(size=(40, 3, SIZE, SIZE)).astype(np.float32)
-    y = ort_backend(str(model_dir / "model.onnx"), 1)(X).argmax(1)           # fp32 predictions as pseudo-labels
+    y = ort_backend(str(model_dir / "model.onnx"), 1)(X).argmax(1)
     backends = {"onnxruntime fp32": ort_backend(str(model_dir / "model.onnx"), 1),
                 "onnxruntime int8": ort_backend(str(int8), 1)}
     rows = run(backends, X, y, {"onnxruntime fp32": 0.0, "onnxruntime int8": 0.0}, n=20, batch=8)

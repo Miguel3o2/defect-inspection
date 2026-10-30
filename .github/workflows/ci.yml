@@ -32,7 +32,6 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: pip
           cache-dependency-path: requirements.txt
-      # CPU-only wheels: the default PyPI wheel pulls ~2 GB of CUDA libraries the runner cannot use
       - name: Install PyTorch (CPU)
         run: pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
       - name: Install dependencies
@@ -66,8 +65,6 @@ jobs:
         run: pip install -r requirements.txt
       - name: Record resolved dependency versions
         run: pip freeze > frozen-requirements.txt
-      # synthetic data: baseline, failure analysis, label noise, ResNet training, ONNX export + parity check,
-      # int8 quantisation, API check, benchmark, PatchCore, unseen-defect comparison
       - name: Pipeline smoke test
         run: python scripts/smoke_pipeline.py --workdir smoke --models-out models
       - name: Build Docker image

@@ -21,7 +21,7 @@ import yaml
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO))
 
-from src.data.neu_det import CLASSES  # noqa: E402
+from src.data.neu_det import CLASSES
 
 
 def make_neudet(root: Path, per_class: int = 60, noisy_per_class: int = 2, seed: int = 0) -> None:
@@ -111,7 +111,6 @@ def main() -> None:
         "deep.yaml", data_dir=str(work / "data" / "NEU-DET"), mlflow=mlflow,
         model={"pretrained": False}, train={"epochs": 2, "batch_size": 32, "num_workers": 0, "aug": "flip", "patience": 5}))
 
-    # ---- torch-free stages ----
     step("baseline: handcrafted features + LogReg/LightGBM", "src.train.train_baseline", "--config", base_cfg)
     report = json.loads(need(work / "artifacts" / "report_lightgbm_val.json").read_text(encoding="utf-8"))
     f1 = report["macro avg"]["f1-score"]
@@ -133,7 +132,6 @@ def main() -> None:
         print("\nSMOKE OK (torch-free stages)")
         return
 
-    # ---- torch stages ----
     step("deep model: ResNet fine-tuning (2 epochs, random init)", "src.train.train_deep", "train", "--config", deep_cfg)
     ckpt = need(work / "artifacts" / "resnet_best.pt")
     need(work / "artifacts" / "predictions_deep_val.csv")
@@ -161,7 +159,6 @@ def main() -> None:
          str(ckpt), "--config", deep_cfg, "--n", "20", "--out", "reports/benchmark.md")
     assert need(work / "reports" / "benchmark.md").read_text(encoding="utf-8").count("onnxruntime") >= 3
 
-    # tiny windows in CI (about 27 images): lower min_samples; only the strong, unambiguous effects are asserted
     mon_cfg = write_cfg("monitoring.yaml", load_cfg("monitoring.yaml", min_samples=20, html_reports=[]))
     step("drift: reference for the exported model", "src.monitoring.drift", "build-reference", "--model-dir", str(bundle),
          "--config", deep_cfg, "--monitoring-config", mon_cfg)

@@ -7,11 +7,11 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-import yaml  # noqa: E402
+import yaml
 
-from src.data.leakage import cross_split_duplicates, phash_all  # noqa: E402
-from src.data.neu_det import discover_images  # noqa: E402
-from src.data.splits import stratified_split  # noqa: E402
+from src.data.leakage import cross_split_duplicates, phash_all
+from src.data.neu_det import discover_images
+from src.data.splits import stratified_split
 
 
 def leakage_report(cfg: dict) -> dict:
@@ -51,7 +51,7 @@ def training_curve(cfg: dict, experiment: str) -> None:
         exp = client.get_experiment_by_name(experiment)
         runs = client.search_runs([exp.experiment_id], order_by=["attribute.start_time DESC"], max_results=1)
         run = runs[0]
-    except Exception as e:  # noqa: BLE001
+    except Exception as e:
         print(f"\nTraining curve: no MLflow run found for experiment {experiment!r} ({type(e).__name__}: {e})")
         return
     print(f"\nTraining curve of the latest run '{run.info.run_name}':")

@@ -54,13 +54,12 @@ def export(ckpt_path: str, out_root: str = "models", config: str = "configs/deep
     dummy = torch.randn(1, 3, size, size)
     kwargs = {"input_names": ["input"], "output_names": ["logits"], "opset_version": opset,
               "do_constant_folding": True, "dynamic_axes": {"input": {0: "batch"}, "logits": {0: "batch"}}}
-    try:                                   # newer torch defaults to the dynamo exporter; use the stable TorchScript one
+    try:
         torch.onnx.export(net, dummy, str(onnx_path), dynamo=False, **kwargs)
-    except TypeError:                      # older torch has no `dynamo` argument
+    except TypeError:
         torch.onnx.export(net, dummy, str(onnx_path), **kwargs)
     onnx.checker.check_model(onnx.load(str(onnx_path)))
 
-    # parity: PyTorch vs ONNX Runtime on a random batch with a different batch size than the dummy
     x = torch.randn(4, 3, size, size)
     with torch.no_grad():
         ref = net(x).numpy()

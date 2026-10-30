@@ -1,4 +1,4 @@
-data_dir: data/raw/NEU-DET     # folder containing the images (any depth)
+data_dir: data/raw/NEU-DET
 cache_dir: data/cache
 image_size: 200
 seed: 42

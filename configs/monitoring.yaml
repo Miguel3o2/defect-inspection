@@ -1,10 +1,10 @@
-columns: [brightness, contrast, sharpness, confidence, label]   # monitored reference-vs-window columns
-alpha: 0.01            # family-wise error rate; each column is tested at alpha / len(columns) (Bonferroni)
-min_samples: 100       # below this a window is too small to test: no verdict
+columns: [brightness, contrast, sharpness, confidence, label]
+alpha: 0.01
+min_samples: 100
 seed: 42
-corruptions:           # simulated production problems, 3 severities each
-  blur:       {param: sigma,  levels: [1.0, 2.0, 4.0]}     # out-of-focus camera
-  brightness: {param: shift,  levels: [20, 40, 70]}        # lighting change
-  contrast:   {param: factor, levels: [0.8, 0.6, 0.4]}     # fogged lens / dim lamp
-  noise:      {param: sigma,  levels: [5, 15, 30]}         # sensor noise
-html_reports: [control, "blur:3"]                          # full Evidently HTML for these scenarios (~4 MB each)
+corruptions:
+  blur:       {param: sigma,  levels: [1.0, 2.0, 4.0]}
+  brightness: {param: shift,  levels: [20, 40, 70]}
+  contrast:   {param: factor, levels: [0.8, 0.6, 0.4]}
+  noise:      {param: sigma,  levels: [5, 15, 30]}
+html_reports: [control, "blur:3"]

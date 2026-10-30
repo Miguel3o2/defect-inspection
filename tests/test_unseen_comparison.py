@@ -66,7 +66,7 @@ def test_make_splits_disjoint_and_complete(root):
     for t in types:
         assert not set(htr[t]) & set(hev[t])
         assert len(htr[t]) + len(hev[t]) == 8
-    assert make_splits(cat, 0)[2]["dent"].tolist() == htr["dent"].tolist()      # deterministic
+    assert make_splits(cat, 0)[2]["dent"].tolist() == htr["dent"].tolist()
 
 
 def test_no_evaluation_image_is_ever_a_supervised_training_image(root, tmp_path):
@@ -80,14 +80,14 @@ def test_no_evaluation_image_is_ever_a_supervised_training_image(root, tmp_path)
         return rng.random(len(all_paths))
 
     rows = run_category(_cfg(root, tmp_path), cat, pc, {"spy": spy})
-    assert len(calls) == 3 and len(rows) == 6                      # 3 folds x (unseen, seen)
+    assert len(calls) == 3 and len(rows) == 6
     held = {t: {str(p) for p, d in zip(cat.test, cat.test_defect, strict=True) if d == t} for t in set(cat.test_defect)}
     good_test = held["good"]
     ordered = sorted(set(cat.test_defect) - {"good"})
     for train, t in zip(calls, ordered, strict=True):
-        assert not train & held[t]                                  # unseen type never trained on
-        assert not train & good_test                                # test/good never trained on
-        assert all(str(p) in train for p in cat.train)              # all good train images are used
+        assert not train & held[t]
+        assert not train & good_test
+        assert all(str(p) in train for p in cat.train)
 
 
 def test_metric_helpers():

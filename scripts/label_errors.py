@@ -52,12 +52,12 @@ def make_figure(row: pd.Series, pred: pd.DataFrame, rng: np.random.Generator):
 def default_show(fig) -> None:
     import matplotlib.pyplot as plt
 
-    if plt.get_backend().lower() == "agg":                 # no GUI backend: save and open with the OS viewer
+    if plt.get_backend().lower() == "agg":
         path = Path("reports") / "_current_error.png"
         path.parent.mkdir(exist_ok=True)
         fig.savefig(path, dpi=100)
         if hasattr(os, "startfile"):
-            os.startfile(path)  # noqa: S606
+            os.startfile(path)
         else:
             print(f"image saved to {path}")
     else:

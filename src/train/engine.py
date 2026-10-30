@@ -19,7 +19,6 @@ def seed_everything(seed: int) -> None:
     np.random.seed(seed)
     torch.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
-    # inputs have a fixed shape, so cudnn can safely autotune conv algorithms
     torch.backends.cudnn.benchmark = True
 
 
@@ -49,7 +48,6 @@ def fit(cfg: dict, images: torch.Tensor, y: np.ndarray, tr: np.ndarray, va: np.n
     seed_everything(train_seed)
     device = get_device()
     t, m = cfg["train"], cfg["model"]
-    # AMP needs tensor cores (RTX / Ampere+); on GTX 16xx fp16 kernels are slower than fp32
     use_amp = bool(t.get("amp", False)) and device.type == "cuda"
 
     train_ds = TensorImageDataset(images[tr], y[tr], build_transform(t["aug"], train=True))

@@ -25,7 +25,7 @@ from src.evaluate.viz import overlay_grid
 
 
 def make_extract_fn(cfg: dict):
-    import torch  # lazy: the rest of this module is torch-free
+    import torch
 
     from src.anomaly.patchcore_extractor import PatchCoreExtractor
 
@@ -50,7 +50,6 @@ def extract_paths(extract_fn, paths, cfg):
 
 def fit_category(cfg: dict, cat: MVTecCategory, extract_fn, out_dir: Path) -> dict:
     seed, crop = cfg["seed"], cfg["crop"]
-    # 1) features of all good train images, split into memory-bank candidates and calibration images
     chunks, hw = [], None
     for _, f, hw_ in extract_paths(extract_fn, cat.train, cfg):
         chunks.append(f)
@@ -60,18 +59,15 @@ def fit_category(cfg: dict, cat: MVTecCategory, extract_fn, out_dir: Path) -> di
     n_cal = max(1, round(cfg["calib_fraction"] * len(feats))) if len(feats) > 2 else 0
     cal_idx, fit_idx = order[:n_cal], order[n_cal:]
 
-    # 2) coreset memory bank
     cand = feats[fit_idx].reshape(-1, feats.shape[-1])
     sel = greedy_coreset(cand, max(1, int(cfg["coreset_ratio"] * len(cand))), cfg["coreset_proj_dim"], seed)
     bank = np.ascontiguousarray(cand[sel])
     print(f"[{cat.name}] {len(fit_idx)} train imgs -> {len(cand)} patches -> bank {bank.shape}")
 
-    # 3) calibration threshold from held-out good images
     cal_scores = score_features(feats[cal_idx], hw, bank, crop, cfg["blur_sigma"])[0] if n_cal else np.array([])
     threshold = float(cal_scores.max()) if n_cal else None
     del feats, cand
 
-    # 4) test (streaming)
     img_scores, maps = [], []
     for _, f, _hw in extract_paths(extract_fn, cat.test, cfg):
         s, m = score_features(f, hw, bank, crop, cfg["blur_sigma"])
@@ -87,7 +83,6 @@ def fit_category(cfg: dict, cat: MVTecCategory, extract_fn, out_dir: Path) -> di
     if threshold is not None:
         res["at_threshold"] = threshold_metrics(is_defect, img_scores, threshold)
 
-    # 5) persist bank (for serving later) and qualitative overlays
     cdir = out_dir / cat.name
     cdir.mkdir(parents=True, exist_ok=True)
     np.save(cdir / "bank.npy", bank)

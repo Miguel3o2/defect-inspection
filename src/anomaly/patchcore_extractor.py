@@ -30,7 +30,7 @@ class PatchCoreExtractor(nn.Module):
         """x [B,3,H,W] -> (features [B, h*w, D], (h, w)); h = H/8, w = W/8."""
         f2 = self.layer2(self.layer1(self.stem(x)))
         f3 = self.layer3(f2)
-        f2, f3 = F.avg_pool2d(f2, 3, 1, 1), F.avg_pool2d(f3, 3, 1, 1)   # local neighbourhood aggregation
+        f2, f3 = F.avg_pool2d(f2, 3, 1, 1), F.avg_pool2d(f3, 3, 1, 1)
         f3 = F.interpolate(f3, size=f2.shape[-2:], mode="bilinear", align_corners=False)
         f = torch.cat([f2, f3], dim=1)
         b, c, h, w = f.shape
