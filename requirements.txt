@@ -15,7 +15,7 @@ torch
 torchvision
 optuna
 pandas<3.1
-cleanlab>=2.6,<3
+cleanlab>=2.9.0,<3
 fastapi
 uvicorn
 onnxruntime
