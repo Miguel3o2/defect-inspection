@@ -94,7 +94,6 @@ def score_features(feats: np.ndarray, hw: tuple[int, int], bank: np.ndarray, out
     """feats [B, h*w, D] -> (image_scores [B], maps [B, out, out])."""
     h, w = hw
     if _torch_cuda() is not None:
-        # one kNN over all patches in the batch instead of a call per image
         d = nn_distances(feats.reshape(-1, feats.shape[-1]), bank).reshape(len(feats), h, w)
         img = d.max(axis=(1, 2)).astype(np.float32)
         maps = np.stack([patch_scores_to_map(dd, out_size, sigma) for dd in d])

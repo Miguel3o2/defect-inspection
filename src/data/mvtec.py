@@ -17,8 +17,8 @@ class MVTecCategory:
     name: str
     train: list[Path]
     test: list[Path]
-    test_defect: list[str]            # "good" or the defect-type folder name
-    test_mask: list[Path | None]      # None for good images
+    test_defect: list[str]
+    test_mask: list[Path | None]
 
 
 def discover(root: str | Path, category: str) -> MVTecCategory:

@@ -1,9 +1,10 @@
 # Runbook: from this repo to real results
 
-**State of play.** The code was developed without access to the real datasets or a working PyTorch install, so:
-the torch parts (ResNet training, ONNX export, PatchCore backbone, `resnet18` supervised scorer) have **never run**,
-and no number in this repo comes from real data. Follow the stages in order; each ends with a gate. Stop at a
-failed gate and fix it before continuing. If something fails, send me the full log of the failing command.
+**State of play.** The pipeline has run end-to-end on real data: NEU-DET (baseline, ResNet, ablation, label-noise
+candidates) and MVTec AD bottle/metal_nut/capsule (PatchCore, unseen-defect comparison), with every number in
+`reports/RESULTS.md` generated from those runs. Not yet run: the Optuna study (`make tune`) and manual confirmation
+of the label-noise candidates. Follow the stages in order for any rerun; each ends with a gate. Stop at a failed
+gate and fix it before continuing.
 
 Rules that protect the credibility of the results:
 1. The **test split is evaluated once**, at the very end (Stage 6), for each model. Everything before uses val.
@@ -26,9 +27,8 @@ make smoke                           # full pipeline on synthetic data incl. ONN
 backbone wrapper (`src/anomaly/patchcore_extractor.py`), `resnet18_binary` scorer.
 
 ## Stage 1: CI on GitHub
-Push, add the CI badge to the top of the README
-(`[![CI](https://github.com/<user>/<repo>/actions/workflows/ci.yml/badge.svg)](https://github.com/<user>/<repo>/actions/workflows/ci.yml)`),
-open the Actions tab.
+Push to `Miguel3o2/defect-inspection` (the README badge already points at this repo) and open the Actions tab;
+`lint-test` and `smoke` must go green on `main`.
 **Gate:** `lint-test` and `smoke` green. Then download `frozen-requirements.txt` from the `smoke-outputs` artifact,
 commit it as a lock file, and require the CI checks on `main` in the repo settings.
 

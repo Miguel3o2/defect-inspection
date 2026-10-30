@@ -12,16 +12,16 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-import numpy as np  # noqa: E402
-import pandas as pd  # noqa: E402
-import yaml  # noqa: E402
-from scipy.stats import binomtest  # noqa: E402
-from sklearn.metrics import f1_score  # noqa: E402
-from sklearn.model_selection import StratifiedKFold, train_test_split  # noqa: E402
+import numpy as np
+import pandas as pd
+import yaml
+from scipy.stats import binomtest
+from sklearn.metrics import f1_score
+from sklearn.model_selection import StratifiedKFold, train_test_split
 
-from src.data.neu_det import CLASSES, discover_images  # noqa: E402
-from src.data.splits import stratified_split  # noqa: E402
-from src.evaluate.metrics import save_predictions  # noqa: E402
+from src.data.neu_det import CLASSES, discover_images
+from src.data.splits import stratified_split
+from src.evaluate.metrics import save_predictions
 
 
 def mcnemar_exact(a_wrong: np.ndarray, b_wrong: np.ndarray) -> tuple[int, int, float]:

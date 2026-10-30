@@ -24,12 +24,12 @@ def test_nn_distances_matches_bruteforce():
 
 def test_coreset_beats_random_coverage():
     rng = np.random.default_rng(1)
-    X = np.concatenate([rng.normal(0, 1, (900, 8)), rng.normal(8, 0.2, (20, 8))]).astype(np.float32)  # rare cluster
+    X = np.concatenate([rng.normal(0, 1, (900, 8)), rng.normal(8, 0.2, (20, 8))]).astype(np.float32)
     sel = greedy_coreset(X, 50, proj_dim=8, seed=0)
     assert len(set(sel.tolist())) == 50
     cover = nn_distances(X, X[sel]).max()
     rand = nn_distances(X, X[rng.choice(len(X), 50, replace=False)]).max()
-    assert cover < rand                      # greedy k-center keeps the rare cluster covered
+    assert cover < rand
     assert (np.abs(X[sel][:, 0] - 8) < 3).any()
 
 
@@ -54,11 +54,10 @@ def test_metrics():
     assert m["precision"] == 1.0 and m["fpr"] == 0.0 and abs(m["recall"] - 2 / 3) < 1e-9
 
 
-# ---------- end-to-end on a synthetic MVTec-like dataset with a fake (numpy) feature extractor ----------
 def _fake_extract(batch):
     b = len(batch)
     cells = batch.reshape(b, 3, 28, 8, 28, 8)
-    f = np.concatenate([cells.mean((3, 5)), cells.std((3, 5))], axis=1)          # [B, 6, 28, 28]
+    f = np.concatenate([cells.mean((3, 5)), cells.std((3, 5))], axis=1)
     return f.transpose(0, 2, 3, 1).reshape(b, 784, 6).astype(np.float32), (28, 28)
 
 

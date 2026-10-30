@@ -1,5 +1,7 @@
 # Surface Defect Inspection Service
 
+[![CI](https://github.com/Miguel3o2/defect-inspection/actions/workflows/ci.yml/badge.svg)](https://github.com/Miguel3o2/defect-inspection/actions/workflows/ci.yml)
+
 An end-to-end ML pipeline for steel-surface defects: a classical-ML baseline, a fine-tuned ResNet, and PatchCore
 anomaly detection, with failure analysis, ONNX serving, CI and drift monitoring. The point is *choosing the right
 model and proving it*, not defaulting to deep learning.
@@ -87,7 +89,7 @@ flowchart LR
 | Class imbalance, label noise, leakage | balanced weights, cleanlab, perceptual-hash leakage check | done |
 | Proper train/val/test, test used once | stratified split, `--eval-test` flag | done |
 | Failure analysis, iterate on data | `reports/failure_analysis.md`, `src/evaluate/` | done |
-| Hyperparameter tuning | Optuna with pruning, augmentation ablation | done |
+| Hyperparameter tuning | Optuna with pruning (built, `make tune`); augmentation ablation run | ablation done |
 | Anomaly detection | PatchCore on MVTec AD, unseen-defect comparison | done |
 | Production inference service | ONNX, int8, FastAPI, Docker, latency benchmark | done |
 | Experiment tracking | MLflow | done |
@@ -120,7 +122,7 @@ mlflow ui --backend-store-uri sqlite:///mlflow.db
 ```bash
 make baseline                          # LogReg + LightGBM on HOG/LBP/GLCM features, val only
 make deep                              # ResNet fine-tuning
-make ablate                            # augmentation ablation, 3 seeds -> artifacts/ablation.md
+make ablate                            # augmentation ablation (policies/seeds in configs/deep.yaml) -> artifacts/ablation.md
 make tune                              # Optuna -> artifacts/best_params.yaml
 python -m src.train.train_deep train --params artifacts/best_params.yaml --eval-test   # final, once
 ```

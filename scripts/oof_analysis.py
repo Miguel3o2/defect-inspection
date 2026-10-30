@@ -12,16 +12,16 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-import numpy as np  # noqa: E402
-import yaml  # noqa: E402
-from lightgbm import LGBMClassifier  # noqa: E402
-from sklearn.metrics import f1_score  # noqa: E402
-from sklearn.model_selection import StratifiedKFold  # noqa: E402
+import numpy as np
+import yaml
+from lightgbm import LGBMClassifier
+from sklearn.metrics import f1_score
+from sklearn.model_selection import StratifiedKFold
 
-from src.data.neu_det import CLASSES, discover_images  # noqa: E402
-from src.data.splits import stratified_split  # noqa: E402
-from src.evaluate.metrics import save_predictions  # noqa: E402
-from src.train.train_baseline import build_features  # noqa: E402
+from src.data.neu_det import CLASSES, discover_images
+from src.data.splits import stratified_split
+from src.evaluate.metrics import save_predictions
+from src.train.train_baseline import build_features
 
 
 def wilson(k: int, n: int, z: float = 1.96) -> tuple[float, float]:

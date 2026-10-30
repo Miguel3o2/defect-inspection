@@ -61,7 +61,7 @@ def resnet18_binary(train_paths, y, all_paths, seed, cfg) -> np.ndarray:
         perm = torch.randperm(len(Y))
         for s in range(0, len(Y), bs):
             idx = perm[s:s + bs]
-            if len(idx) < 2:          # BatchNorm needs >1 sample
+            if len(idx) < 2:
                 continue
             opt.zero_grad(set_to_none=True)
             loss_fn(net(X[idx].to(device, non_blocking=True)), Y[idx].to(device, non_blocking=True)).backward()

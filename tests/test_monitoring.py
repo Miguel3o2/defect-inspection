@@ -48,9 +48,11 @@ def _log_for(bundle, grays, log_path):
 
 
 def test_corruptions_have_the_intended_effect():
+    def lap(a):
+        return cv2.Laplacian(a, cv2.CV_64F).var()
+
     rng = np.random.default_rng(0)
     img = rng.integers(0, 256, (64, 64), dtype=np.uint8)
-    lap = lambda a: cv2.Laplacian(a, cv2.CV_64F).var()  # noqa: E731
     assert lap(apply("blur", img, 2.0)) < lap(img) / 5
     assert apply("brightness", img, 40).mean() > img.mean() + 10
     assert apply("contrast", img, 0.5).std() < img.std() * 0.6
@@ -101,12 +103,12 @@ def test_simulation_detects_drift_without_false_alarm(world, tmp_path):
     rows = simulate.main(["--model-dir", str(world["bundle"]), "--config", str(world["cfg_path"]),
                           "--out", str(tmp_path / "drift"), "--monitoring-config", str(_write(world, tmp_path))])
     by = {(r["scenario"], r["severity"]): r for r in rows}
-    assert by[("control", 0)]["alert"] is False                              # no false alarm on clean data
+    assert by[("control", 0)]["alert"] is False
     assert by[("blur", 3)]["alert"] and "sharpness" in by[("blur", 3)]["drifted_columns"]
     assert by[("brightness", 3)]["alert"] and "brightness" in by[("brightness", 3)]["drifted_columns"]
-    assert by[("control", 0)]["macro_f1"] > 0.8                              # the stub really classifies the data
-    assert by[("brightness", 3)]["f1_drop"] > 0.3                            # brightness shift hurts this model ...
-    assert by[("blur", 3)]["f1_drop"] < 0.05                                 # ... blur does not (benign drift)
+    assert by[("control", 0)]["macro_f1"] > 0.8
+    assert by[("brightness", 3)]["f1_drop"] > 0.3
+    assert by[("blur", 3)]["f1_drop"] < 0.05
     md = (tmp_path / "drift" / "drift_simulation.md").read_text()
     assert "detected, harmful" in md and "detected, benign" in md and "no false alarm" in md
     assert (tmp_path / "drift" / "blur_3.html").stat().st_size > 10_000
@@ -140,4 +142,4 @@ def test_check_cli_exit_codes(world, tmp_path):
 
     assert check(clean) == 0
     assert check(blurred) == 1
-    assert check(small) == 0          # too few samples: no verdict, no alert
+    assert check(small) == 0

@@ -1,18 +1,18 @@
-data_root: data/raw/mvtec_ad          # contains <category>/train/good, <category>/test/..., <category>/ground_truth/...
+data_root: data/raw/mvtec_ad
 categories: [bottle, metal_nut, capsule]
 out_dir: artifacts/patchcore
 seed: 42
 
-backbone: wide_resnet50_2             # wide_resnet50_2 | resnet18
+backbone: wide_resnet50_2
 pretrained: true
-out_dim: 1024                         # channel reduction of concatenated layer2+layer3 features
+out_dim: 1024
 resize: 256
 crop: 224
 batch_size: 16
 
-coreset_ratio: 0.1                    # 0.01 = fast/rough, 0.1 = default, 0.25 = best/slow
+coreset_ratio: 0.1
 coreset_proj_dim: 128
-calib_fraction: 0.1                   # held-out GOOD train images -> deployment threshold (not in memory bank)
+calib_fraction: 0.1
 blur_sigma: 4
 
 mlflow: {tracking_uri: "sqlite:///mlflow.db", experiment: "mvtec-patchcore"}

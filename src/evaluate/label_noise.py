@@ -34,7 +34,7 @@ def main(config_path: str, out: str, folds: int, top: int) -> None:
                            **cfg["lightgbm"])
     oof = cross_val_predict(model, X, labels, method="predict_proba",
                             cv=StratifiedKFold(folds, shuffle=True, random_state=cfg["seed"]))
-    issues = find_label_issues(labels, oof, return_indices_ranked_by="self_confidence", n_jobs=1)  # most likely wrong first
+    issues = find_label_issues(labels, oof, return_indices_ranked_by="self_confidence", n_jobs=1)
 
     in_train = set(tr.tolist())
     df = pd.DataFrame({

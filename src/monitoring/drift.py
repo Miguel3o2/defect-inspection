@@ -26,7 +26,7 @@ from src.features.handcrafted import load_gray
 from src.serve.app import Model
 from src.serve.preprocess import image_stats, to_tensor
 
-os.environ.setdefault("EVIDENTLY_DISABLE_TELEMETRY", "1")   # only relevant to Evidently's UI service
+os.environ.setdefault("EVIDENTLY_DISABLE_TELEMETRY", "1")
 INPUT_COLS = ["brightness", "contrast", "sharpness"]
 
 
@@ -75,7 +75,7 @@ def check_drift(reference: pd.DataFrame, current: pd.DataFrame, columns: list[st
     for m in snap.dict()["metrics"]:
         cfg = m.get("config", {})
         if cfg.get("type", "").endswith("ValueDrift"):
-            if cfg["method"] not in ("ks", "chisquare"):          # alert rule below assumes p-values
+            if cfg["method"] not in ("ks", "chisquare"):
                 raise RuntimeError(f"unexpected drift method {cfg['method']!r}")
             per_col[cfg["column"]] = {"p_value": float(m["value"]), "method": cfg["method"],
                                       "drifted": bool(m["value"] < thr)}

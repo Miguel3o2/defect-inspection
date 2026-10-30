@@ -1,14 +1,14 @@
 data_root: data/raw/mvtec_ad
-patchcore_dir: artifacts/patchcore     # run `make patchcore` first (needs test_scores.csv)
+patchcore_dir: artifacts/patchcore
 out_dir: artifacts/comparison
 categories: [bottle, metal_nut, capsule]
-seed: 42                               # defect-image split seed
+seed: 42
 resize: 256
 crop: 224
 
 supervised:
   models: [handcrafted_lgbm, resnet18]
-  seeds: [0, 1, 2]                     # scores are averaged over seeds (an ensemble = a stronger baseline)
+  seeds: [0, 1, 2]
 resnet: {pretrained: true, epochs: 10, batch_size: 16, lr: 1.0e-4, weight_decay: 1.0e-4}
 
 bootstrap: {n: 1000, fpr: 0.05}

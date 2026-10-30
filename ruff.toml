@@ -4,7 +4,8 @@ extend-exclude = ["data", "artifacts", "models", "mlruns"]
 
 [lint]
 select = ["E", "F", "W", "I", "B", "C4", "UP", "ISC", "PLW"]
-ignore = ["E501"]   # line length is not enforced; there is no formatter gate
+ignore = ["E501"]
 
 [lint.per-file-ignores]
-"tests/**" = ["E402"]   # importorskip() must run before the imports it guards
+"tests/**" = ["E402"]
+"scripts/**" = ["E402"]

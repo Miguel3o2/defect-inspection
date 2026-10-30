@@ -5,10 +5,8 @@ WORKDIR /app
 COPY docker/requirements-serve.txt .
 RUN pip install --no-cache-dir -r requirements-serve.txt
 
-# runtime code only: no torch, no training code
 COPY src/__init__.py src/__init__.py
 COPY src/serve src/serve
-# model bundle: models/current/{model.onnx, meta.json}  (created by `python -m src.deploy.export_onnx --set-current`)
 COPY models/current models/current
 
 RUN useradd --create-home app && chown -R app /app

@@ -69,7 +69,6 @@ def cmd_train(a) -> None:
             (OUT / f"report_deep_{name}.json").write_text(json.dumps(s["report"], indent=2), encoding="utf-8")
             print(f"[deep] {name}: acc={s['accuracy']:.3f} macro_f1={s['macro_f1']:.3f}")
 
-        # misclassified val samples -> input for reports/failure_analysis.md
         with (OUT / "misclassified_val.csv").open("w", newline="", encoding="utf-8") as f:
             w = csv.writer(f)
             w.writerow(["path", "true", "pred", "confidence"])
